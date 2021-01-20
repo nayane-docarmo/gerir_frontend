@@ -7,15 +7,16 @@ import {useHistory} from 'react-router-dom';
 
 const Login = () => {
     let history = useHistory();
-
+    //public string Email { get; set; };
     const [email, setEmail] = useState('');
     const [senha, setSenha] = useState('');
 
+    //Chama o evento de logar na Api
     const logar = (event) => {
         event.preventDefault();
 
-     
-
+        //representa o objeto que contém
+        //os dados do usuário para login
         const objLogin ={
             "email" : email,
             "senha" : senha
@@ -29,18 +30,24 @@ const Login = () => {
                 'content-type' : 'application/json'
             }
         })
-        .then(Response => {
-            if(Response.ok){
-                return Response.json();
+        .then(response => {
+            //Verifica se a resposta da Api esta ok
+            if(response.ok){
+                return response.json();
             }
+
+            //Caso tenha retornado algum erro da api informa 
+            //o usário
             alert("Dados inválidos");
         })
         .then(data => {
             console.log(data);
 
-            localStorage.setItem('token-gerir',data.token);
+            localStorage.setItem('token-gerir', data.token);
 
-            history.push("/tarefa");
+            history.push("/tarefas");
+
+            //Navegar para as tarefas
         })
     }
 

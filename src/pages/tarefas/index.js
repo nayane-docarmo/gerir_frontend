@@ -1,5 +1,6 @@
-import react, { useState, useEffect } from 'react';
-import { Container, Table, Card, Form, Button, InputGroup } from 'react-bootstrap';
+import React, { useState, useEffect } from 'react';
+import {Container, Card, Form, Table, Button, InputGroup} from 'react-bootstrap'
+import moment from 'moment';
 
 
 const Tarefas = () => {
@@ -60,46 +61,105 @@ const Tarefas = () => {
             alert('Tarefa salva');
 
             listarTarefas();
+
+            limparCampos();
         })
+    }
+    const editar =(event) => {
+        event.preventDefault();
+
+        fetch('http://localhost:5000/api/tarefa/' + event.target.value,{
+            method : 'GET',
+            headers : {
+                'authorization' : 'Bearer ' + localStorage.getItem('token-gerir')
+            }
+        })
+        .then(response => response.json())
+        .then(data => {
+            setId(data.id);
+            setTitulo(data.titulo);
+            setDescricao(data.descricao);
+            setCategoria(data.categoria);
+            setDataEntrega(data.dataentrega.substring(0,10));
+            setStatus(data.status);
+        })
+        .catch(error => {
+            console.error(error);
+        })
+    }
+
+    const excluir = (event) => {
+
+        if(window.confirm("Deseja realmente excuir a tarefa?")){
+            fetch('http://localhost:5000/api/tarefa/' + event.target.value,{
+                method : 'Delete',
+                headers : {
+                    'authorization' : 'Bearer ' + localStorage.getItem('token-gerir')
+                }
+            })
+            .then(() => {
+                alert('Tarefa excluída!!!');
+
+                listarTarefas();
+            })
+        }
+    }
+
+    const alterarStatus = (event) => {
+        if(window.confirm("Deseja realmente alterar o status da tarefa?")){
+            fetch('http://localhost:5000/api/tarefa/status/' + event.target.value,{
+                method : 'Put',
+                headers : {
+                    'authorization' : 'Bearer ' + localStorage.getItem('token-gerir')
+                }
+            })
+            .then(() => {
+                alert('Tarefa alterada!!!');
+
+                listarTarefas();
+            })
+        }
+    }
+
+    const limparCampos = () => {
+        setId(0);
+        setTitulo('');
+        setDescricao('');
+        setCategoria('');
+        setDataEntrega('');
+        setStatus(false);
     }
     return (
         <Container>
             <Card>
-                <Card.Body>
+               <Card.Body>
+                        <Form onSubmit={ event => salvar(event)}>
+                            <Form.Group controlId="formBasicTitulo">
+                                <Form.Label>Título</Form.Label>
+                                <Form.Control type="text" value={titulo} onChange={event => setTitulo(event.target.value)} placeholder="Informe o título" required />
+                            </Form.Group>
 
-                      <Form onSubmit={ event => salvar(event)}>
-                        <Form.Group controlId="formBasicTitulo">
-                            <Form.Label>Título</Form.Label>
-                            <Form.Control type="text" value={titulo} onChange={event => setTiulo(event.target.value)} placeholder="Informe o titulo" required />
-                        </Form.Group>
+                            <Form.Group controlId="formBasicDescricao">
+                                <Form.Label>Descrição</Form.Label>
+                                <Form.Control type="text" value={descricao} onChange={event => setDescricao(event.target.value)}  placeholder="Informe a descrição" required />
+                            </Form.Group>
 
-                        <Form.Group controlId="formBasicDescricao">
-                            <Form.Label>Descrição</Form.Label>
-                            <Form.Control type="text" value={descricao} onChange={event => setDescricao(event.target.value)} placeholder="Informe a descrição" required />
-                        </Form.Group>
+                            <Form.Group controlId="formBasicCategoria">
+                                <Form.Label>Categoria</Form.Label>
+                                <Form.Control type="text" value={categoria} onChange={event => setCategoria(event.target.value)}  placeholder="Informe a categoria" required />
+                            </Form.Group>
 
-                        <Form.Group controlId="formBasicCategoria">
-                            <Form.Label>Categoria</Form.Label>
-                            <Form.Control type="text" value={categoria} onChange={event => setCategoria(event.target.value)} placeholder="Informe a categoria" required />
-                        </Form.Group>
+                            <Form.Group controlId="formBasicDataEntrega">
+                                <Form.Label>Data Entrega</Form.Label>
+                                <Form.Control type="date" value={dataEntrega} onChange={event => setDataEntrega(event.target.value)} placeholder="Informe a data de entrega" required />
+                            </Form.Group>
 
-                        <Form.Group controlId="formBasicDataEntrega">
-                            <Form.Label>Data Entrega</Form.Label>
-                            <Form.Control type="text" value={dataEntrega} onChange={event => setDataEntrega(event.target.value)} placeholder="Informe a data de entrega" required />
-                        </Form.Group>
-
-                        <Form.Group controlId="formBasicStatus">
-                            <Form.Label>Status</Form.Label>
-                            <InputGroup.Prepend>
-                                <InputGroup.Checkbox value={status} onChange={event => setStatus(event.target.value)} aria-label="Checkobox for followig intput" />
-                            </InputGroup.Prepend>
-                        </Form.Group>
-
-                        <Button type="submit">Salvar</Button>
-                    </Form>
+                            
+                            <Button type="submit">Salvar</Button>
+                        </Form>
                 </Card.Body>
             </Card>
-
+            
             <Table striped bordered hover>
                 <thead>
                     <tr>
